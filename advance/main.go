@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/snowlyg/learns/windows"
+	"github.com/snowlyg/learns/advance/windows"
 )
 
 func run() {
@@ -54,43 +54,118 @@ func main() {
 	if err != nil {
 		fmt.Printf("new service get error %v \n", err)
 	}
-	if len(os.Args) < 2 {
-		usage("no command specified")
-	}
-	srvName := strings.ToLower(os.Args[2])
-	cmd := strings.ToLower(os.Args[1])
-	switch cmd {
-	case "start": // 启动
-		err := windows.ServiceStart(srvName)
-		if err != nil {
-			fmt.Printf("%v \n", err)
+	if len(os.Args) >= 2 {
+
+		srvName := strings.ToLower(os.Args[2])
+		cmd := strings.ToLower(os.Args[1])
+		switch cmd {
+		case "start": // 启动
+			err := windows.ServiceStart(srvName)
+			if err != nil {
+				fmt.Printf("%v \n", err)
+			}
+			println("start success")
+			return
+		case "install": //安装
+			if len(os.Args) == 7 {
+				err := windows.ServiceInstall(srvName, os.Args[3], os.Args[4], os.Args[5], os.Args[6])
+				if err != nil {
+					fmt.Printf("%v \n", err)
+				}
+			} else if len(os.Args) == 5 {
+				err := windows.ServiceInstall(srvName, os.Args[3], os.Args[4])
+				if err != nil {
+					fmt.Printf("%v \n", err)
+				}
+			} else {
+				usage("error command specified")
+			}
+
+			println("install success")
+			return
+		case "stop": // 停止
+			err := windows.ServiceStop(srvName)
+			if err != nil {
+				fmt.Printf("%v \n", err)
+			}
+			println("stop success")
+			return
+		case "remove": // 卸载
+			err := windows.ServiceUninstall(srvName)
+			if err != nil {
+				fmt.Printf("%v \n", err)
+			}
+			println("remove success")
+			return
+		case "status": // 查询服务状态
+			status, _ := windows.ServiceStatus(srvName)
+			if status == windows.StatusRunning {
+				println("运行中")
+			} else if status == windows.StatusStopped {
+				println("已停止")
+			} else if status == windows.StatusUninstall {
+				println("未安装")
+			} else if status == windows.StatusUninstall {
+				println("未安装")
+			}
+			return
+		default:
+			println("invaild command")
 		}
-		println("start success")
-	case "install": //安装
-		if len(os.Args) != 7 {
-			usage("no command specified")
+		switch cmd {
+		case "start": // 启动
+			err := windows.ServiceStart(srvName)
+			if err != nil {
+				fmt.Printf("%v \n", err)
+			}
+			println("start success")
+			return
+		case "install": //安装
+			if len(os.Args) == 7 {
+				err := windows.ServiceInstall(srvName, os.Args[3], os.Args[4], os.Args[5], os.Args[6])
+				if err != nil {
+					fmt.Printf("%v \n", err)
+				}
+			} else if len(os.Args) == 5 {
+				err := windows.ServiceInstall(srvName, os.Args[3], os.Args[4])
+				if err != nil {
+					fmt.Printf("%v \n", err)
+				}
+			} else {
+				usage("error command specified")
+			}
+
+			println("install success")
+			return
+		case "stop": // 停止
+			err := windows.ServiceStop(srvName)
+			if err != nil {
+				fmt.Printf("%v \n", err)
+			}
+			println("stop success")
+			return
+		case "remove": // 卸载
+			err := windows.ServiceUninstall(srvName)
+			if err != nil {
+				fmt.Printf("%v \n", err)
+			}
+			println("remove success")
+			return
+		case "status": // 查询服务状态
+			status, _ := windows.ServiceStatus(srvName)
+			if status == windows.StatusRunning {
+				println("运行中")
+			} else if status == windows.StatusStopped {
+				println("已停止")
+			} else if status == windows.StatusUninstall {
+				println("未安装")
+			} else if status == windows.StatusUnknown {
+				println("未知状态")
+			}
+			return
+		default:
+			println("invaild command")
 		}
-		err := windows.ServiceInstall(srvName, os.Args[3], os.Args[4], os.Args[5], os.Args[6])
-		if err != nil {
-			fmt.Printf("%v \n", err)
-		}
-		println("install success")
-	case "stop": // 停止
-		err := windows.ServiceStop(srvName)
-		if err != nil {
-			fmt.Printf("%v \n", err)
-		}
-		println("stop success")
-	case "remove": // 卸载
-		err := windows.ServiceUninstall(srvName)
-		if err != nil {
-			fmt.Printf("%v \n", err)
-		}
-		println("remove success")
-	case "status": // 查询服务状态
-		println(windows.ServiceStatus(srvName))
-	default:
-		println("invaild command")
 	}
 	s.Run(false)
 }

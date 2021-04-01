@@ -7,7 +7,7 @@ import (
 	"golang.org/x/sys/windows/svc/mgr"
 )
 
-func ServiceInstall(svcName, execPath, dispalyName, serviceStartName, pwd string, args ...string) error {
+func ServiceInstall(svcName, execPath, dispalyName string, args ...string) error {
 	m, err := mgr.Connect()
 	if err != nil {
 		return err
@@ -18,12 +18,15 @@ func ServiceInstall(svcName, execPath, dispalyName, serviceStartName, pwd string
 		s.Close()
 		return fmt.Errorf("service %s already exists", svcName)
 	}
-	s, err = m.CreateService(svcName, execPath, mgr.Config{
-		DisplayName:      dispalyName,
-		StartType:        mgr.StartAutomatic,
-		ServiceStartName: serviceStartName,
-		Password:         pwd,
-	}, args...)
+	config := mgr.Config{
+		DisplayName: dispalyName,
+		StartType:   mgr.StartAutomatic,
+	}
+	if len(args) >= 2 {
+		config.ServiceStartName = args[0]
+		config.Password = args[1]
+	}
+	s, err = m.CreateService(svcName, execPath, config)
 	if err != nil {
 		return fmt.Errorf("CreateService() failed: %s", err)
 	}
